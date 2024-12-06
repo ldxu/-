@@ -14,6 +14,10 @@
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <unordered_map>
 #include <iostream>
-#include <string.h>
+#include <fstream>
+#include <vector>
+#include <climits>
+#include <string>
 #endif
