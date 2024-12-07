@@ -6,40 +6,6 @@
 
 #IncludeRegexTransform: 
 
-/workspace/include/config.h
-stdafx.h
-/workspace/include/stdafx.h
-
-/workspace/include/stdafx.h
-fcntl.h
--
-netinet/in.h
--
-sys/socket.h
--
-sys/un.h
--
-sys/epoll.h
--
-arpa/inet.h
--
-stdio.h
--
-unistd.h
--
-unordered_map
--
-iostream
--
-fstream
--
-vector
--
-climits
--
-string
--
-
 /workspace/log/blockqueue.h
 deque
 -
@@ -66,6 +32,10 @@ atomic
 assert.h
 -
 
+/workspace/log/log.cpp
+log.h
+/workspace/log/log.h
+
 /workspace/log/log.h
 mutex
 -
@@ -87,10 +57,4 @@ blockqueue.h
 /workspace/log/blockqueue.h
 buffer.h
 /workspace/log/buffer.h
-
-/workspace/main.cpp
-./log/log.h
-/workspace/log/log.h
-./include/config.h
-/workspace/include/config.h
 

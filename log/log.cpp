@@ -54,9 +54,20 @@ void Log::AsyncWrite_() {
         fputs(str.c_str(), fp_);
     }
 }
+void Log::ReInit(int level, const char* path, const char* suffix, int maxQueCapacity)
+{
+        auto deque_ptr = deque_.release();
+        // if (deque_ptr)
+        //     delete deque_ptr;
+        auto write_ptr = writeThread_.release();
+        // if (write_ptr)
+        //     delete write_ptr;
+        Log();
+        Init(level, path, suffix, maxQueCapacity);
 
+}
 // 初始化日志实例
-void Log::init(int level, const char* path, const char* suffix, int maxQueCapacity) {
+void Log::Init(int level, const char* path, const char* suffix, int maxQueCapacity) {
     isOpen_ = true;
     level_ = level;
     path_ = path;

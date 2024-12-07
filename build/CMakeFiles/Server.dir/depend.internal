@@ -10,7 +10,9 @@ CMakeFiles/Server.dir/log/log.cpp.o
  /workspace/log/log.cpp
  /workspace/log/log.h
 CMakeFiles/Server.dir/main.cpp.o
+ /workspace/include/_signal.h
  /workspace/include/config.h
+ /workspace/include/daemon.h
  /workspace/include/stdafx.h
  /workspace/log/blockqueue.h
  /workspace/log/buffer.h

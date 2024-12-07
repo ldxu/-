@@ -9,7 +9,9 @@ CMakeFiles/Server.dir/log/log.cpp.o: ../log/buffer.h
 CMakeFiles/Server.dir/log/log.cpp.o: ../log/log.cpp
 CMakeFiles/Server.dir/log/log.cpp.o: ../log/log.h
 
+CMakeFiles/Server.dir/main.cpp.o: ../include/_signal.h
 CMakeFiles/Server.dir/main.cpp.o: ../include/config.h
+CMakeFiles/Server.dir/main.cpp.o: ../include/daemon.h
 CMakeFiles/Server.dir/main.cpp.o: ../include/stdafx.h
 CMakeFiles/Server.dir/main.cpp.o: ../log/blockqueue.h
 CMakeFiles/Server.dir/main.cpp.o: ../log/buffer.h
