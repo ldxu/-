@@ -48,7 +48,8 @@
         }
         else
         {
-            return "";
+            return   "Invalid";
+
         }
     }
     int CConfig::GetInt(const std::string& elementName, int def)
