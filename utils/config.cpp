@@ -1,5 +1,6 @@
 #include "../include/config.h"
-#include "tools.h"
+#include "../include/toolsfunc.h"
+
     bool CConfig::Load(const std::string& configName)
     {
             std::ifstream fp(configName);
