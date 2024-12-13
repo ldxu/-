@@ -16,17 +16,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <unordered_map>
 #include <iostream>
-#include <vector>
 #include <fstream>
 #include <climits>
-#include <string>
+#include <semaphore.h>
 
 #include <signal.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+
+#include <map>
+#include <unordered_map>
+#include <string>
+#include <vector>
+#include <atomic>
+#include <list>
+#include <memory>       //智能指针需要用到的库
 
 
 #endif
