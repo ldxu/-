@@ -54,7 +54,12 @@ void Log::AsyncWrite_() {
         fputs(str.c_str(), fp_);
     }
 }
-
+void Log::ChildInit(int level, const char* path, const char* suffix, int maxQueCapacity)
+{
+    // 子进程的关键在于要把之前的文件句柄清空，其他的按照正常的Log初始化就行
+    fp_ = nullptr;
+    Init(level, path, suffix, maxQueCapacity);
+}
 // 初始化日志实例
 void Log::Init(int level, const char* path, const char* suffix, int maxQueCapacity) {
     isOpen_ = true;

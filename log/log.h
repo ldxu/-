@@ -27,10 +27,9 @@ public:
     int GetLevel();
     void SetLevel(int level);
     bool IsOpen() { return isOpen_; }
-    void ReInit(int level, const char* path = "./log", 
+    void ChildInit(int level, const char* path = "./log", 
                 const char* suffix =".log",
                 int maxQueueCapacity = 1024);
-    
 private:
     Log();
     void AppendLogLevelTitle_(int level);
