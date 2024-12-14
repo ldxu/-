@@ -10,7 +10,7 @@ extern int     g_os_argc;                  //参数个数
 extern char    **g_os_argv;                //命令行参数数组首地址
 
 extern int     g_daemonized;               //守护进程标记，标记是否启用了守护进程模式
-
+extern int     g_procPid;                   //记录运行的进程id
 extern sig_atomic_t  g_childReraise;        //重新启动挂了的子进程标记 
 extern int           g_processStatuCode;
 // extern CLogicSocket  g_socket;  

@@ -20,7 +20,7 @@ int     g_processStatuCode;             //进程标记
 int     g_stopEvent;                    //进程退出标志
 const char* configName = "./nginx.conf";//日志文件地址
 CSocket g_socket;                       //全局的通信对象
-pid_t   m_procPid;                      //保存当前进程的id
+pid_t   g_procPid;                      //保存当前进程的id
 sig_atomic_t  g_childReraise;           //子进程退出的标记，master进程需要重新拉起一个子进程
 //---------------------------------------------------全局变量声明 END------------------------------------------------------
 /*
@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
     }
     // 决定早点就启用日志，这样可以记录更多的信息
     // 从配置文件中读取日志文件的存放地址
-    std::string _logFolderPath = cfg.GetString("Log");
+    std::string _logFolderPath = cfg.GetString("Log") + "/master/";
     // master进程使用同步日志就行
     Log::Instance()->Init(1,_logFolderPath.c_str(), ".log", 0);
     pid_t _parent = getpid();
@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
     int _daemonCode = cfg.GetInt("Daemon", 0);
 
     g_processStatuCode = PROCESS_MASTER;
-    m_procPid = _parent;
+    g_procPid = _parent;
     pid_t _daemon;
     // 信号初始化，不同的类型进程对于信号的处理是不一样的
     if (InitSignals() !=0 )
@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
     }
 
     // Socket对象初始化（打开监听端口）
-    if (g_socket.Initialize() == -1)
+    if (!g_socket.Initialize())
     {
         LOG_ERROR("Server.cpp 中 g_socket.Initialize() failed!");
         _exitCode = 1;
@@ -95,20 +95,20 @@ int main(int argc, char* argv[])
             goto lblexit;
         }
         g_daemonized = 1;               //守护进程的标记
-        m_procPid = getpid();           //记录守护进程的ID
+        g_procPid = getpid();           //记录守护进程的ID
     }
 
-    MainProcessCycle();
+    MainProcessCycle();//master和worker都在这个循环里面
     
 
 lblexit:
     if (g_daemonized)
     {
-        LOG_INFO("守护进程[pid:%d]退出----------------------------------------------", m_procPid);
+        LOG_INFO("守护进程[pid:%d]退出----------------------------------------------", g_procPid);
     }
     else
     {
-        LOG_INFO("进程[pid:%d]退出----------------------------------------------", m_procPid);
+        LOG_INFO("进程[pid:%d]退出----------------------------------------------", g_procPid);
     }
     return _exitCode;
 }

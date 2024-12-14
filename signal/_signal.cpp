@@ -108,7 +108,7 @@ static void SignalHandler(int signo, siginfo_t *siginfo, void* ucontext)
     // 记录一些日志信息
     if (siginfo && siginfo->si_pid)
     {
-        LOG_INFO("signal %d (%s) received from %P", signo, sig->sigName, siginfo->si_pid);
+        LOG_INFO("signal %d (%s) received from %d", signo, sig->sigName, siginfo->si_pid);
     }
     else
     {
@@ -168,11 +168,11 @@ static void GetProcessStatus(void)
         one = 1;    //记录已经处理了一次信号
         if (WTERMSIG(status))
         {
-            LOG_ERROR("pid = %P exited on signal %d!",pid, WTERMSIG(status)); //获取使子进程终止的信号编号
+            LOG_ERROR("pid = %d exited on signal %d!",pid, WTERMSIG(status)); //获取使子进程终止的信号编号
         }
         else
         {
-            LOG_ERROR("pid = %P exited with code %d!",pid,WEXITSTATUS(status));
+            LOG_ERROR("pid = %d exited with code %d!",pid,WEXITSTATUS(status));
         }
     }    
     return;      
