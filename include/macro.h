@@ -5,4 +5,6 @@
 #define PROCESS_WORKER          0
 
 #define LISTEN_BACKLOG          128
+
+#define EPOLL_EVENTS_SIZE       512
 #endif

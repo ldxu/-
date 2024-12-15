@@ -78,7 +78,7 @@ static void SignalHandler(int signo, siginfo_t *siginfo, void* ucontext)
             break;
     }
 
-    action = (char*)"anonymous";          //无法获知发送信号的进程id，则把他归为匿名
+    action = (char*)"Terminal";          //无法获知发送信号的进程id，则把他归为匿名
 
     if (g_processStatuCode == PROCESS_MASTER) // 如果是master进程则执行这一套的信号逻辑
     {
@@ -86,6 +86,9 @@ static void SignalHandler(int signo, siginfo_t *siginfo, void* ucontext)
         {
             case SIGCHLD:
                 g_childReraise = 1;
+                break;
+            case SIGTERM:
+                g_masterProcExitCode = 1;           //父进程退出标志
                 break;
             /*
                 其他的信号处理需要的操作
@@ -99,6 +102,17 @@ static void SignalHandler(int signo, siginfo_t *siginfo, void* ucontext)
         /*
             worker进程执行的信号处理函数，后续想到了要加什么再完善
         */
+        switch (signo)
+        {
+            case SIGTERM:
+                g_workerProcExitCode = 1;           //父进程退出标志
+                break;
+            /*
+                其他的信号处理需要的操作
+            */
+            default:
+                break;
+        }
     }
     else//其他状态的信号来了，暂且不处理
     {
@@ -177,3 +191,4 @@ static void GetProcessStatus(void)
     }    
     return;      
 }
+

@@ -33,6 +33,13 @@
 #include <atomic>
 #include <list>
 #include <memory>       //智能指针需要用到的库
+#include <mutex>
+#include <thread>       //c++11线程新范式
+#include <condition_variable>   //条件变量
+#include <queue>
 
+#include <future>
+#include <functional>
+#include <stdexcept>
 
 #endif

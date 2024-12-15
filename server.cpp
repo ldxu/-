@@ -19,9 +19,12 @@ int     g_daemonized = 0;               //守护进程标记，标记是否启�
 int     g_processStatuCode;             //进程标记
 int     g_stopEvent;                    //进程退出标志
 const char* configName = "./nginx.conf";//日志文件地址
+threadpool  g_threadpool;               //线程池对象
 CSocket g_socket;                       //全局的通信对象
 pid_t   g_procPid;                      //保存当前进程的id
 sig_atomic_t  g_childReraise;           //子进程退出的标记，master进程需要重新拉起一个子进程
+sig_atomic_t  g_masterProcExitCode;        //父进程收到信号后，通知子进程退出
+sig_atomic_t  g_workerProcExitCode;          //工作进程收到信号后退出
 //---------------------------------------------------全局变量声明 END------------------------------------------------------
 /*
     std::cerr << "\033[31m" << "This is an error message in red" << "\033[0m" << std::endl;

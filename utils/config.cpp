@@ -65,12 +65,12 @@
             catch (const std::invalid_argument& e) 
             {
                 std::cout<<"invalid argument"<<std::endl;
-                return INT_MAX;
+                return def;
             }
         }
         else
         {
             std::cout<<"no element name"<<std::endl;
-            return INT_MAX;
+            return def;
         }
     }

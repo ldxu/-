@@ -9,7 +9,10 @@ static void StartWorkerProcess(int processCount, std::unordered_map<pid_t, std::
 //创建每个worker进程的函数
 static int  SpawnProcess(int inum, const char* procName, const char* logFolderPath);
 //worker进程进入的循环
-static void WorkerProcessCycle(int inum, const char* procName);
+static void WorkerProcessCycle(int inum, const char* procName, const char* logFolderPath);
+
+static void WorkerProcessInit();
+
 void MainProcessCycle()
 {
     sigset_t    set;        //声明一个信号集
@@ -50,11 +53,18 @@ void MainProcessCycle()
             预计在这里加上检测子进程退出后，重新将子进程启动,此时就需要一个标志位来记录行为了
             
         */
-       std::cerr << "Master进程检测到信号" << std::endl;
-       // 重新启动worker进程
-       if (g_childReraise)
+       if (g_masterProcExitCode) // 收到退出信号，那么就要通知子进程做相应的操作了
        {
-        std::cerr << "Master进程开始检测子进程的状态" << std::endl;
+            for (auto& it:workerProcessUmap)
+            {
+                kill(it.first, 15);         //直接做通知就行
+            }
+            LOG_INFO("通知所有worker进程下线!");
+            break;
+       }
+       // 重新启动worker进程
+       if (g_childReraise && false)
+       {
         loopRaiseChild:
             //如果子进程退出去了，那么重新拉起来一个子进程
             for (auto& it:workerProcessUmap)
@@ -68,9 +78,12 @@ void MainProcessCycle()
                     if (errno == ESRCH)
                     {
                         pid_t pid = SpawnProcess(0, "Worker", it.second.c_str());
+                        
                         if (pid == -1)
                         {
-                            LOG_ERROR("检测到worker进程 %d 退出, 重新拉起进程失败!", it.first, pid);
+                            LOG_ERROR("检测到worker进程 %d 退出, 重新拉起进程失败!", it.first, pid);\
+                            // 应该把这个信号从我们的umap中删除
+                            workerProcessUmap.erase(it.first);
                         }
                         else if(pid > 0)
                         {
@@ -95,11 +108,12 @@ void MainProcessCycle()
 
 static void StartWorkerProcess(int processCount, std::unordered_map<pid_t, std::string>& umap)
 {
+    std::string logFolderPath = CConfig::Instance().GetString("Log");
     for (int i=0; i < processCount; ++i)
     {
         //不保证全部都创建成功
         char logPath[100] = {0};
-        sprintf(logPath, "%s/worker%d/", CConfig::Instance().GetString("Log").c_str(), i);
+        sprintf(logPath, "%s/worker%d/", logFolderPath.c_str(), i);
         pid_t pid = SpawnProcess(i, "Worker", logPath);
         switch (pid)
         {
@@ -131,10 +145,7 @@ static int  SpawnProcess(int inum, const char* procName, const char* logFolderPa
         break;
     case 0:
         //子进程进入到这里
-        g_procPid = getpid();   //保留进程号信息
-        SetProcessName(procName, g_os_argc, g_os_argv);     //设置新标题
-        Log::Instance()->Init(1, logFolderPath, ".log", 1024);  //开启独立日志系统
-        WorkerProcessCycle(inum, procName);
+        WorkerProcessCycle(inum, procName, logFolderPath);
         break;
     default:
         break;
@@ -142,10 +153,66 @@ static int  SpawnProcess(int inum, const char* procName, const char* logFolderPa
     return pid;
 }
 
-static void WorkerProcessCycle(int inum, const char* procName)
+static void WorkerProcessCycle(int inum, const char* procName, const char* logFolderPath)
 {
+    g_procPid = getpid();   //保留进程号信息
+    SetProcessName(procName, g_os_argc, g_os_argv);     //设置新标题
+    Log::Instance()->Init(1, logFolderPath, ".log", 0);  //开启独立日志系统
+    LOG_INFO("  X   X   L        DDDD  ");
+    LOG_INFO("   X X    L        D   D ");
+    LOG_INFO("    X     L        D   D ");
+    LOG_INFO("   X X    L        D   D ");
+    LOG_INFO("  X   X   LLLLLLL  DDDD   ");
     LOG_INFO("Worker进程[%d]开始工作！", getpid());
+    
     g_processStatuCode = PROCESS_WORKER;
-    sleep(10);
+    WorkerProcessInit();
+
+    for (;;)
+    {
+        if (g_workerProcExitCode)
+        {
+            LOG_INFO("收到Mater进程的退出指示, 进程退出!");
+            break;
+        }
+        ProcessEventsLoop();
+    }
     exit(0);
+}
+
+static void WorkerProcessInit()
+{
+    sigset_t    set;        //信号集
+    sigemptyset(&set);      //清空信号集
+
+    if (sigprocmask(SIG_SETMASK, &set, NULL) == -1)
+    {
+        LOG_ERROR("WorkerProcessInit() 中 sigprocmask() 失败");
+    }
+
+    // 开启线程池--------------------------------------------------------------------------------
+    int threadPoolCount = CConfig::Instance().GetInt("ProcMsgRecvWorkThreadCount", 5);
+    try
+    {
+        g_threadpool.Create(threadPoolCount);
+    }
+    catch(const std::exception& e)
+    {
+        //如果捕获到异常，那么就直接退出吧
+        LOG_ERROR("在创建线程池的时候发生异常，程序退出!");
+        exit(-2);
+    }
+    // END--------------------------------------------------------------------------------------
+
+    // 开启一些专用线程（发送消息、心跳检测、延迟回收等）-----------------------------------------
+    g_socket.EpollInit();
+    return;
+    
+}
+
+/// @brief epoll 循环读取事件，即在epoll初始化后，需要进入到这个循环来得去事件
+void ProcessEventsLoop()
+{
+    g_socket.EpollProcessEvent(-1);
+    // 可以打印一些信息 每次处理完了可以打印一遍
 }

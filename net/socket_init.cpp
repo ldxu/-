@@ -13,6 +13,20 @@ CSocket::~CSocket()
 {
 
 }
+
+void CSocket::IninConnections()
+{
+    for (int i=0; i < c_workerConnections; ++i)
+    {
+        std::shared_ptr<ConnectionItem> _Conn = std::make_shared<ConnectionItem>();
+        _Conn->GetOneToUse();                   //初始化一些信息
+        c_connectionList.push_back(_Conn);      //加入到连接队列
+        c_freeConnectionlist.push_back(_Conn);  //添加到空闲连接队列
+    }
+    LOG_INFO("开启连接池，连接池中共有 %d 个连接.", c_workerConnections);
+    c_freeWorkerConnections = c_workerConnections = c_freeConnectionlist.size();
+    return;
+}
 bool CSocket::Initialize()
 {
     if (ReadConfig())
@@ -33,11 +47,12 @@ bool CSocket::ReadConfig()
 {
     CConfig& cfg = CConfig::Instance();
     c_listenSockCount = cfg.GetInt("ListenPortCount", 0);
-    if (!c_listenSockCount) //如果监听0个端口，那肯定出问题了直接返回错误就行
+    if (c_listenSockCount == 0) //如果监听0个端口，那肯定出问题了直接返回错误就行
     {
         LOG_ERROR("监听端口数量配置有问题!");
         return false;
     }
+    c_workerConnections = cfg.GetInt("worker_connections", 1024);
     return true;
 }
 
@@ -68,7 +83,7 @@ bool CSocket::OpenListeningSocket()
             LOG_ERROR("CSocket::Initialize()中setsockopt(SO_REUSEADDR)失败,i=%d. error:{%s}",i, std::strerror(errno));
             return false;
         }
-        
+        // 用于解决惊群问题
         int reuseport = 1;
         if (setsockopt(isock, SOL_SOCKET, SO_REUSEPORT, (const void*)&reuseport, sizeof(int)) == -1)
         {

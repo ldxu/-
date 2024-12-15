@@ -15,5 +15,9 @@ int Daemon(pid_t& m_pid);
 
 //信号相关
 int InitSignals();
+
+// epoll 相关
 void MainProcessCycle();
+// epoll循环事件
+void ProcessEventsLoop();
 #endif
